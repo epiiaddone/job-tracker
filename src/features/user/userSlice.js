@@ -8,7 +8,7 @@ import { registerUserThunk, loginUserThunk, clearStoreThunk, updateUserThunk } f
 const initialState = {
     isLoading: false,
     isSideBarOpen:false,
-    user: getUserFromLocalStorage() || {name:'Mark', location:'Oxford'},
+    user: getUserFromLocalStorage() || {name:'Mark', location:'Oxford', lastName:'Williams', email:'mail@test.com'},
 }
 
 export const registerUser = createAsyncThunk('user/registerUser', registerUserThunk);
@@ -16,6 +16,7 @@ export const registerUser = createAsyncThunk('user/registerUser', registerUserTh
 export const loginUser = createAsyncThunk('user/loginUser', loginUserThunk);
 
 export const updateUser = createAsyncThunk('user/updateUser', updateUserThunk);
+
 
 export const clearStore = createAsyncThunk('/user/clearStore',clearStoreThunk);
 
@@ -31,6 +32,11 @@ const userSlice = createSlice({
             state.isSideBarOpen=false;
             removeUserFromLocalStorage();
             if(payload) toast.success(payload);
+        },
+        updateUserNoAPI: (state, {payload})=>{
+            state.user=payload.tempUserData;
+            console.log(payload);
+            addUserToLocalStorage(payload.tempUserData);
         }
     },
     extraReducers: (builder) =>{
@@ -70,5 +76,9 @@ const userSlice = createSlice({
     }
 });
 
-export const {toggleSideBar, logoutUser} = userSlice.actions;
+export const {
+    toggleSideBar,
+    logoutUser,
+    updateUserNoAPI
+} = userSlice.actions;
 export default userSlice.reducer;

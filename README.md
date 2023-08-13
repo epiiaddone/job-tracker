@@ -19,3 +19,9 @@ mementjsh
 ### logo image
 need to do in Figma
 recharts
+
+###
+profile not working
+login not working
+search not working
+pagination not working

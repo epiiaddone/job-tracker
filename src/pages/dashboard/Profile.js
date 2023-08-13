@@ -3,44 +3,62 @@ import {useState} from 'react';
 import FormRow from '../../components/FormRow';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { updateUser } from '../../features/user/userSlice';
+import { updateUser, updateUserNoAPI } from '../../features/user/userSlice';
 import { addUserToLocalStorage } from '../../utils/localStorage';
 
 const Profile = ()=>{
     const {isLoading, user} = useSelector((store)=>store.user);
-    const dispatch = useDispatch();
-    //why is this not taken from the global store?
-    const [userData, setUserData] = useState({
+
+    const [isEditable, setIsEditable] = useState(false);
+
+    let buttonMessage = '';
+    if(isLoading) buttonMessage = 'Loading...';
+    else if(isEditable) buttonMessage = 'Save Changes';
+    else buttonMessage = 'Edit Profile';
+
+    
+    const [tempUserData, setTempUserData] = useState({
         name: user?.name || '',
         email: user?.email || '',
         lastName: user?.lastName || '',
         location: user?.location || ''
     });
+    const {name, email, location, lastName} = tempUserData;
 
-    const {name, email, location, lastName} = userData;
+    const dispatch = useDispatch();
+
+    
 
     const handleSubmit = (e)=>{
-        e.preventDefault();
+      e.preventDefault();
+
+        if(!isEditable){
+          setIsEditable(true);
+          return;
+        }
+        
         if(!name || !email || !location || !lastName ){
             toast.error('please fill out all fields')
             return;
         }
-        //this is also called in userSlice, but API call blocked
-        addUserToLocalStorage(userData);
-        dispatch(updateUser({userData}));
+
+        setIsEditable(false);
+        dispatch(updateUserNoAPI({tempUserData}));
+
     }
-    const handleChange = (e)=> setUserData({...userData, [e.target.name]:e.target.value})
+    const handleChange = (e)=> setTempUserData({...tempUserData, [e.target.name]:e.target.value})
 
     return(
         <Wrapper>
             <form className="form" onSubmit={handleSubmit}>
-                <h3>profiile</h3>
+                <h3>profile</h3>
                 <div className="form-center">
                     <FormRow
                         type="text"
                         name="name"
                         value={name}
                         onChange={handleChange}
+                        disabled={!isEditable}
                     />
                                         <FormRow
                         type="text"
@@ -48,21 +66,25 @@ const Profile = ()=>{
                         labelText="last name"
                         value={lastName}
                         onChange={handleChange}
+                        disabled={!isEditable}
                     />
                                         <FormRow
                         type="email"
                         name="email"
                         value={email}
                         onChange={handleChange}
+                        disabled={!isEditable}
                     />
-                                        <FormRow
+                        <FormRow
                         type="text"
                         name="location"
                         value={location}
                         onChange={handleChange}
+                        disabled={!isEditable}
+
                     />
                     <button type="sumbit" className="btn btn-block" disabled={isLoading}>
-                        {isLoading ? 'Please Wait...' : 'Save Changes'}
+                    {buttonMessage}
                     </button>
                 </div>
             </form>
