@@ -7,7 +7,7 @@ import FormRow from '../components/FormRow';
 
 import {useNavigate} from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, registerUser } from "../features/user/userSlice";
+import { loginUser, registerUser, registerUserNoAPI } from "../features/user/userSlice";
 
 const intialState = {
     name:'',
@@ -39,7 +39,8 @@ const RegisterPage = () => {
            dispatch(loginUser({email:email, password:password}));
            return;
         }
-        dispatch(registerUser({name,email,password}));
+        dispatch(registerUserNoAPI({name,email,password}));
+        //dispatch(registerUser({name,email,password}));
     };
 
     const toggleMember = () => {

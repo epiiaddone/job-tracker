@@ -37,6 +37,17 @@ const userSlice = createSlice({
             state.user=payload.tempUserData;
             console.log(payload);
             addUserToLocalStorage(payload.tempUserData);
+        },
+        registerUserNoAPI:(state, {payload})=>{
+            state.user = payload;
+            toast.success(`Hello There ${state.user.name}`);
+            addUserToLocalStorage(state.user);
+        },
+        loginUserNoAPI:(state, {payload})=>{
+            const currentUser = getUserFromLocalStorage();
+            if(payload.email===currentUser.email){
+               toast.success(`Welcome Back ${state.user.name}`);
+            }
         }
     },
     extraReducers: (builder) =>{
@@ -79,6 +90,7 @@ const userSlice = createSlice({
 export const {
     toggleSideBar,
     logoutUser,
-    updateUserNoAPI
+    updateUserNoAPI,
+    registerUserNoAPI
 } = userSlice.actions;
 export default userSlice.reducer;
