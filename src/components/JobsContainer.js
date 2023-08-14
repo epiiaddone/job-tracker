@@ -7,6 +7,8 @@ import { JOBS_PER_PAGE, getAllJobs, getAllJobsNoAPI } from '../features/allJobs/
 import { getJobsFromLocalStorage } from '../utils/localStorage';
 import { jobsData } from '../utils/jobs';
 import PageBtnContainer from './PageBtnContainer';
+import { latestSort, positionSort } from '../utils/jobsSort';
+import { statusPredicate, typePredicate } from '../utils/jobsFilter';
 
 const JobsContainer = ()=>{
     const {jobs, isLoading, page,
@@ -22,16 +24,6 @@ const JobsContainer = ()=>{
 
     if(isLoading) return <Loading center/>   
 
-      const typePredicate = (job)=>{
-        if(searchType==='all') return true;
-        return job.jobType===searchType;
-      }
-
-      const statusPredicate = (job)=>{
-        if(searchStatus==='all') return true;
-        return job.status===searchStatus;
-      }
-
       const searchPredicate = (job)=>{
         const searchString = search.trim().toLowerCase();
         if(searchString==='') return true;
@@ -41,28 +33,12 @@ const JobsContainer = ()=>{
 
       const paginatePredicate = (i)=>{
         return (i<page*JOBS_PER_PAGE && i >= (page-1)*JOBS_PER_PAGE)
-      }
- 
+      } 
 
     let filteredJobs = jobs
-      .filter((job)=>typePredicate(job))
-      .filter((job)=>statusPredicate(job))
+      .filter((job)=>typePredicate(job, searchType))
+      .filter((job)=>statusPredicate(job, searchStatus))
       .filter((job)=>searchPredicate(job));
-
-
-    const positionSort = (jobA,jobB)=>{
-      if(jobA.position < jobB.position) return -1;
-      if(jobA.position > jobB.position) return 1;
-      return 0;
-    }
-
-    const latestSort = (jobA, jobB)=>{
-      const dateA = Date.parse(jobA.createdAt);
-      const dateB = Date.parse(jobB.createdAt);
-      if(dateA > dateB) return -1;
-      if(dateA < dateB) return 1;
-      return 0;
-    }
 
     switch(sort){
       case 'latest': filteredJobs.sort(latestSort); break;
