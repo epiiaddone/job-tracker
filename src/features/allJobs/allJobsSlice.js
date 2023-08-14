@@ -16,13 +16,13 @@ const initialFilterState = {
 const initialState = {
     isLoading: false,
     jobs: [],
-    totalJobs: 12,
-    numOfPages: 2,
     page: 1,
     stats: {},
     monthlyApplications: [],
     ...initialFilterState,
 };
+
+export const JOBS_PER_PAGE = 8;
 
 export const getAllJobs = createAsyncThunk('allJobs/getJobs', getAllJobsThunk);
 
@@ -94,7 +94,6 @@ const allJobsSlice = createSlice({
             state.isLoading = false;
             state.jobs = action.payload.jobs;
             state.numOfPages = action.payload.numOfPages;
-            state.totalJobs = action.payload.totalJobs;
         }).addCase(getAllJobs.rejected,  (state,action) => {
             state.isLoading = false;
             toast.error(action.payload);
@@ -120,7 +119,7 @@ export const {
     editJobNoAPI,
     showStatsNoAPI,
     handleChange,
-    clearFilters ,
+    clearFilters,
     changePage,
 clearAllJobsState  } = allJobsSlice.actions;
 

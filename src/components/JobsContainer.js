@@ -3,13 +3,13 @@ import {useEffect} from 'react';
 import Job from './Job';
 import {useSelector, useDispatch} from 'react-redux';
 import Loading from './Loading';
-import { getAllJobs, getAllJobsNoAPI } from '../features/allJobs/allJobsSlice';
+import { JOBS_PER_PAGE, getAllJobs, getAllJobsNoAPI } from '../features/allJobs/allJobsSlice';
 import { getJobsFromLocalStorage } from '../utils/localStorage';
 import { jobsData } from '../utils/jobs';
 import PageBtnContainer from './PageBtnContainer';
 
 const JobsContainer = ()=>{
-    const {jobs, isLoading, page, numOfPages, totalJobs,
+    const {jobs, isLoading, page,
     search, searchStatus, searchType,sort} = useSelector((store)=>store.allJobs);
 
     const dispatch = useDispatch();
@@ -18,28 +18,80 @@ const JobsContainer = ()=>{
 
     useEffect(()=>{        
         dispatch(getAllJobsNoAPI());
-    },[search,searchStatus,searchType,sort])
+    },[])
 
     if(isLoading) return <Loading center/>   
 
-    if(jobs.length===0){
-        return(
-            <Wrapper>
-                <h2>No jobs to display</h2>
-            </Wrapper>
-        )
+      const typePredicate = (job)=>{
+        if(searchType==='all') return true;
+        return job.jobType===searchType;
+      }
+
+      const statusPredicate = (job)=>{
+        if(searchStatus==='all') return true;
+        return job.status===searchStatus;
+      }
+
+      const searchPredicate = (job)=>{
+        const searchString = search.trim().toLowerCase();
+        if(searchString==='') return true;
+        if(job.position.toLowerCase().indexOf(searchString)>-1) return true;
+        return false;
+      }
+
+      const paginatePredicate = (i)=>{
+        return (i<page*JOBS_PER_PAGE && i >= (page-1)*JOBS_PER_PAGE)
+      }
+ 
+
+    let filteredJobs = jobs
+      .filter((job)=>typePredicate(job))
+      .filter((job)=>statusPredicate(job))
+      .filter((job)=>searchPredicate(job));
+
+
+    const positionSort = (jobA,jobB)=>{
+      if(jobA.position < jobB.position) return -1;
+      if(jobA.position > jobB.position) return 1;
+      return 0;
     }
+
+    const latestSort = (jobA, jobB)=>{
+      const dateA = Date.parse(jobA.createdAt);
+      const dateB = Date.parse(jobB.createdAt);
+      if(dateA > dateB) return -1;
+      if(dateA < dateB) return 1;
+      return 0;
+    }
+
+    switch(sort){
+      case 'latest': filteredJobs.sort(latestSort); break;
+      case 'oldest': filteredJobs.sort(latestSort).reverse(); break;
+      case 'a-z': filteredJobs.sort(positionSort); break;
+      case 'z-a': filteredJobs.sort(positionSort).reverse(); break;
+    }
+
+    let paginatedJobs = filteredJobs.filter((job,i)=>paginatePredicate(i));
+
+    if(paginatedJobs.length===0){
+      return(
+          <Wrapper>
+              <h2>No jobs to display</h2>
+          </Wrapper>
+      )
+  }
 
     return(
         <Wrapper>
-            <h5>{totalJobs} {totalJobs > 1 ? 'jobs' : 'job'}</h5>
+            <h5>{filteredJobs.length} {filteredJobs.length > 1 ? 'jobs' : 'job'}</h5>
             <div className='jobs'>
-                {jobs.map((job)=>{
+                {paginatedJobs.map((job)=>{
                     //console.log(job)
                     return <Job key={job._id} {...job}/>
-                })}
+                })
+                }
             </div>
-            {numOfPages > 1 && <PageBtnContainer/>}
+            {Math.ceil(filteredJobs.length / JOBS_PER_PAGE) > 1 && <PageBtnContainer/>}
         </Wrapper>
     )
 

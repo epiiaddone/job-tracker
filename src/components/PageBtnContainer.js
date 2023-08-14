@@ -1,11 +1,13 @@
 import styled from 'styled-components';
 import {HiChevronDoubleLeft, HiChevronDoubleRight} from 'react-icons/hi';
 import { useSelector, useDispatch } from 'react-redux';
-import { changePage } from '../features/allJobs/allJobsSlice';
+import { JOBS_PER_PAGE, changePage } from '../features/allJobs/allJobsSlice';
 
 const PageBtnContainer = ()=>{
-    const {numOfPages, page} = useSelector(store=>store.allJobs);
+    const { page, jobs} = useSelector(store=>store.allJobs);
     const dispatch = useDispatch();
+
+    const numOfPages = Math.ceil(jobs.length / JOBS_PER_PAGE);
 
     const pages = Array.from({length:numOfPages}, (_,index)=>{
         return index + 1;
