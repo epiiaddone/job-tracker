@@ -8,7 +8,7 @@ import { getJobsFromLocalStorage } from '../utils/localStorage';
 import { jobsData } from '../utils/jobs';
 import PageBtnContainer from './PageBtnContainer';
 import { latestSort, positionSort } from '../utils/jobsSort';
-import { statusPredicate, typePredicate } from '../utils/jobsFilter';
+import { paginatePredicate, searchPredicate, statusPredicate, typePredicate } from '../utils/jobsFilter';
 
 const JobsContainer = ()=>{
     const {jobs, isLoading, page,
@@ -24,21 +24,14 @@ const JobsContainer = ()=>{
 
     if(isLoading) return <Loading center/>   
 
-      const searchPredicate = (job)=>{
-        const searchString = search.trim().toLowerCase();
-        if(searchString==='') return true;
-        if(job.position.toLowerCase().indexOf(searchString)>-1) return true;
-        return false;
-      }
-
-      const paginatePredicate = (i)=>{
-        return (i<page*JOBS_PER_PAGE && i >= (page-1)*JOBS_PER_PAGE)
-      } 
+      // const paginatePredicate = (i)=>{
+      //   return (i<page*JOBS_PER_PAGE && i >= (page-1)*JOBS_PER_PAGE)
+      // } 
 
     let filteredJobs = jobs
       .filter((job)=>typePredicate(job, searchType))
       .filter((job)=>statusPredicate(job, searchStatus))
-      .filter((job)=>searchPredicate(job));
+      .filter((job)=>searchPredicate(job, search));
 
     switch(sort){
       case 'latest': filteredJobs.sort(latestSort); break;
@@ -47,7 +40,7 @@ const JobsContainer = ()=>{
       case 'z-a': filteredJobs.sort(positionSort).reverse(); break;
     }
 
-    let paginatedJobs = filteredJobs.filter((job,i)=>paginatePredicate(i));
+    let paginatedJobs = filteredJobs.filter((job,i)=>paginatePredicate(i,page, JOBS_PER_PAGE));
 
     if(paginatedJobs.length===0){
       return(
