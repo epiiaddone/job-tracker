@@ -27,7 +27,7 @@ test("positionSort should sold in alphabetical order", ()=>{
         {position:'a Engineer'},
         {position:'DDD class 45'},
         {position:'soft 56'},
-    ]
+    ];
     const result = testArray.sort(positionSort);
     expect(result).toStrictEqual([
         {position:'a Engineer'},
@@ -35,5 +35,5 @@ test("positionSort should sold in alphabetical order", ()=>{
         {position:'DDD class 45'},
         {position:'soft 56'},
         {position:'zEngineer'}
-    ])
+    ]);
 })
